@@ -21,7 +21,6 @@ public class Devoir2
 			
 			for (int i = 0; i < nbOfProblems; i++)
 			{
-				br.skip(2);
 				String polygonStr = br.readLine();
 				new Problem(polygonStr);
 			}
