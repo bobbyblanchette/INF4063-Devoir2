@@ -1,6 +1,3 @@
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -10,7 +7,7 @@ public class Problem
 	public Problem(String polygon)
 	{
 		System.out.println("Polygone " + polygon);
-		display(triangulate(process(polygon), new HashSet<Set<Character>>()));
+		display(triangulate(process(polygon), new ArrayList<List<Character>>()));
 	}
 	
 	private List<Character> process(String polygonStr){
@@ -20,17 +17,17 @@ public class Problem
     private void display(List<List<Segment>> solutions){
     	for (int i = 0; i < solutions.size(); i++){
         	List<Segment> solution = solutions.get(i);
-        	System.out.print((i+1) + ": ");
-            for (Segment segment : solution){
-                System.out.print("" + segment.firstVertex + segment.secondVertex + " ");
+        	String line = (i+1) + ": ";
+        	for (Segment segment : solution){
+                line += "" + segment.firstVertex + segment.secondVertex + " ";
             }
-            System.out.println();
+        	System.out.println(line);
         }
     }
 
-	private List<List<Segment>> triangulate(List<Character> polygon, Set<Set<Character>> alreadyUsed){
+	private List<List<Segment>> triangulate(List<Character> polygon, List<List<Character>> alreadyUsed){
 		List<List<Segment>> result = new ArrayList<List<Segment>>();
-		Set<Set<Character>> alreadyUsedCopy = new HashSet<Set<Character>>(alreadyUsed); 
+		List<List<Character>> alreadyUsedCopy = new ArrayList<List<Character>>(alreadyUsed); 
 		if (polygon.size() <= 3)
 			return new ArrayList<List<Segment>>();
 		for (int i = 3; i < polygon.size(); i++){
@@ -63,12 +60,15 @@ public class Problem
 		if (secondSolutionSet.size() == 0){
 			return firstSolutionSet;
 		}
+		List<List<Segment>> result = new ArrayList<List<Segment>>();
 		for (List<Segment> firstSolution : firstSolutionSet){
 			for (List<Segment> secondSolution : secondSolutionSet){
-				secondSolution.addAll(firstSolution);
+				List<Segment> newSolution = new ArrayList<Segment>(firstSolution);
+				newSolution.addAll(secondSolution);
+				result.add(newSolution);
 			}
 		}
-		return secondSolutionSet;
+		return result;
 	}
 	
 	private List<List<Segment>> addFinalSegment(List<List<Segment>> solutionSet, Segment finalSegment){
@@ -86,7 +86,7 @@ public class Problem
 	}
 	
 	private class Segment{
-		public Set<Character> vertices = new HashSet<Character>();
+		public List<Character> vertices = new ArrayList<Character>();
 		public char firstVertex;
 		public char secondVertex;
 		public Segment(char firstVertex, char secondVertex){
