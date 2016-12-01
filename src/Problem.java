@@ -17,9 +17,9 @@ public class Problem
 		return polygonStr.chars().mapToObj(e->(char)e).collect(Collectors.toList());
 	}
 	
-    private void display(List<Set<Segment>> solutions){
+    private void display(List<List<Segment>> solutions){
     	for (int i = 0; i < solutions.size(); i++){
-        	Set<Segment> solution = solutions.get(i);
+        	List<Segment> solution = solutions.get(i);
         	System.out.print((i+1) + ": ");
             for (Segment segment : solution){
                 System.out.print("" + segment.firstVertex + segment.secondVertex + " ");
@@ -28,11 +28,11 @@ public class Problem
         }
     }
 
-	private List<Set<Segment>> triangulate(List<Character> polygon, Set<Set<Character>> alreadyUsed){
-		List<Set<Segment>> result = new ArrayList<Set<Segment>>();
+	private List<List<Segment>> triangulate(List<Character> polygon, Set<Set<Character>> alreadyUsed){
+		List<List<Segment>> result = new ArrayList<List<Segment>>();
 		Set<Set<Character>> alreadyUsedCopy = new HashSet<Set<Character>>(alreadyUsed); 
 		if (polygon.size() <= 3)
-			return new ArrayList<Set<Segment>>();
+			return new ArrayList<List<Segment>>();
 		for (int i = 3; i < polygon.size(); i++){
 			Segment finalSegment = new Segment(polygon.get(0), polygon.get(i - 1));
 			if (!alreadyUsedCopy.contains(finalSegment.vertices)){
@@ -40,30 +40,45 @@ public class Problem
 				List<Character> leftPolygon = new ArrayList<Character>(polygon.subList(0, i));
 				List<Character> rightPolygon = new ArrayList<Character>(polygon.subList(i - 1, polygon.size()));
 				rightPolygon.add(polygon.get(0));
-				List<Set<Segment>> leftSolution = triangulate(leftPolygon, alreadyUsedCopy);
-				List<Set<Segment>> rightSolution = triangulate(rightPolygon, alreadyUsedCopy);
-				rightSolution.addAll(leftSolution);
-				result.addAll(addFinalSegment(rightSolution, finalSegment));
+				List<List<Segment>> leftSolution = triangulate(leftPolygon, alreadyUsedCopy);
+				List<List<Segment>> rightSolution = triangulate(rightPolygon, alreadyUsedCopy);
+				List<List<Segment>> newSolution = combine(leftSolution, rightSolution);
+				result.addAll(addFinalSegment(newSolution, finalSegment));
 			}
 		}
 		Segment finalSegment = new Segment(polygon.get(1), polygon.get(polygon.size() - 1));
 		if (!alreadyUsedCopy.contains(finalSegment.vertices)){
 			alreadyUsedCopy.add(finalSegment.vertices);
 			List<Character> lastPolygon = new ArrayList<Character>(polygon.subList(1, polygon.size()));
-			List<Set<Segment>> lastSolution = triangulate(lastPolygon, alreadyUsedCopy);
+			List<List<Segment>> lastSolution = triangulate(lastPolygon, alreadyUsedCopy);
 			result.addAll(addFinalSegment(lastSolution, finalSegment));
 		}
 		return result;
 	}
 	
-	private List<Set<Segment>> addFinalSegment(List<Set<Segment>> solutionSet, Segment finalSegment){
+	private List<List<Segment>> combine(List<List<Segment>> firstSolutionSet, List<List<Segment>> secondSolutionSet){
+		if (firstSolutionSet.size() == 0){
+			return secondSolutionSet;
+		}
+		if (secondSolutionSet.size() == 0){
+			return firstSolutionSet;
+		}
+		for (List<Segment> firstSolution : firstSolutionSet){
+			for (List<Segment> secondSolution : secondSolutionSet){
+				secondSolution.addAll(firstSolution);
+			}
+		}
+		return secondSolutionSet;
+	}
+	
+	private List<List<Segment>> addFinalSegment(List<List<Segment>> solutionSet, Segment finalSegment){
 		if (solutionSet.size() > 0)
-			for (Set<Segment> solution : solutionSet){
+			for (List<Segment> solution : solutionSet){
 				solution.add(finalSegment);
 			}
 		else
 		{
-			Set<Segment> newSolution = new HashSet<Segment>();
+			List<Segment> newSolution = new ArrayList<Segment>();
 			newSolution.add(finalSegment);
 			solutionSet.add(newSolution);
 		}
